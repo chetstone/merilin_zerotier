@@ -1,0 +1,2 @@
+#!/bin/sh
+cru a ZeroTierDaemon "* * * * * /opt/etc/init.d/S90zerotier-one.sh start"

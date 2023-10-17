@@ -1,0 +1,17 @@
+#!/bin/sh
+logger -t "custom iptables" "Enter" -p user.notice
+ZT_NETWORK=10.147.17.0/24
+iptables -C INPUT -i zt+ -j ACCEPT
+if [ $? != 0 ]; then
+    iptables -I INPUT -i zt+ -j ACCEPT
+    iptables -t nat -I PREROUTING -i zt+ -d $ZT_NETWORK -p tcp -m multiport --dport 21,22,80 -j DNAT --to-destination `nvram get lan_ipaddr`
+    iptables -t nat -A POSTROUTING -o br0 -s $ZT_NETWORK -j SNAT --to-source `nvram get lan_ipaddr`
+    iptables -I FORWARD -i zt+ -d `nvram get lan_ipaddr`/24 -j ACCEPT
+    iptables -I FORWARD -i br0 -d $ZT_NETWORK -j ACCEPT
+#    iptables -I INPUT -p udp --dport 9993 -j ACCEPT
+#    iptables -I INPUT -p tcp --dport 9993 -j ACCEPT
+#    iptables -I INPUT -s `nvram get lan_ipaddr`/24 -j ACCEPT
+    logger -t "custom iptables" "rules added" -p user.notice
+else
+    logger -t "custom iptables" "rules existed skip" -p user.notice
+fi
